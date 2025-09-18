@@ -97,7 +97,7 @@ def nullify_fields(data: list[dict], pointers: list[JsonPathStr]) -> list[dict]:
     
     Args:
         data (list[dict]): A list of dictionaries representing the JSONL data.
-        pointers (list[JsonPointer | str]): A list of JSON Pointers or strings representing the fields to nullify.
+        pointers (JsonPathStr): A list of JSON Pointers or strings representing the fields to nullify.
         
     Returns:
         list[dict]: The modified list of dictionaries with specified fields set to an empty string.

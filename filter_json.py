@@ -1,7 +1,7 @@
 import os
 import json
 import re
-import argparse
+from argparse import ArgumentParser
 import hashlib
 from typing import Any, Dict, List, Union, Annotated
 from pprint import pprint
@@ -112,29 +112,35 @@ def nullify_fields(data: list[dict], pointers: list[JsonPathStr]) -> list[dict]:
 
 
 if __name__ == '__main__':
+    parser = ArgumentParser(description="Filter and mangle JSONL data.")
+    parser.add_argument('--input', '-i', type=str, required=True, help='Input JSONL file path.')
+    parser.add_argument('--output', '-o', type=str, required=False, default='mangled_data.jsonl', help='Output JSONL file path.')
+    parser.add_argument('--pointers', '-p', type=str, nargs='+', required=False, default=[], help='List of JSON Pointers to nullify.')
+    parser.add_argument('--pointer_file', '-f', type=str, required=False, help='File containing JSON Pointers to nullify, one per line.')
+    
+    args = parser.parse_args()
+    input_file = args.input
+    output_file = args.output
+    # Get pointers from command line list and specified file
+    pointers = args.pointers
+    with open(args.pointer_file, 'r') as pf:
+        pointers.extend([line.strip() for line in pf if line.strip()])
 
-    with open ('data.jsonl', 'r') as f:
+    # Get the devide name mapping from Resync start markers
+    markers = read_start_markers(input_file)
+    device_mappings = get_device_mappings(markers)
+    
+    # Read the input JSONL file
+    with open (input_file, 'r') as f:
         data = [json.loads(line) for line in f]
 
-    pointers = [
-        'userLabel',
-        'description',
-        'networkConstruct..id'
-    ]
-
-    markers = read_start_markers('data.jsonl')
-    device_mappings = get_device_mappings(markers)
-
+    # Mangle device names and nullify specified fields
     mangled_data = mangle_device_names(data, device_mappings)
     mangled_data = nullify_fields(mangled_data, pointers)
 
-    with open('mangled_data.jsonl', 'w') as f:
+    # Write the modified data to the output JSONL file
+    with open(output_file, 'w') as f:
         for entry in mangled_data:
             f.write(json.dumps(entry).replace(' ', '') + '\n')
-    
-    for pointer in pointers:
-        json_str = f'$..object_data..{pointer}'
-        json_expr = jsonparse(json_str)
-        print(f'{json_str}: ', [match.value for match in json_expr.find(mangled_data)])
-
+    print(f"Mangled data written to {output_file}")
     

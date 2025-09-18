@@ -3,13 +3,14 @@ import json
 import re
 import argparse
 import hashlib
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Annotated
 from pprint import pprint
 
 from jsonpath_ng import jsonpath
 from jsonpath_ng import parse as jsonparse
 from jsonpointer import JsonPointer, JsonPointerException
 
+JsonPathStr = Annotated[str, "A string formatted as a JSONPath expression from jsonpath_ng."]
 # Regex pattern to match device names in the format !ND=DeviceName
 # Only works with CISCO
 REGEX_STR = r'!ND=([\w\-]*)'
@@ -91,7 +92,7 @@ def mangle_device_names(data: list[dict], device_mappings: dict[str, str]) -> li
     return data
 
 
-def nullify_fields(data: list[dict], pointers: list[JsonPointer | str]) -> list[dict]:
+def nullify_fields(data: list[dict], pointers: list[JsonPathStr]) -> list[dict]:
     """Nullify fields in the data based on the provided JSON Pointers.
     
     Args:
@@ -99,19 +100,15 @@ def nullify_fields(data: list[dict], pointers: list[JsonPointer | str]) -> list[
         pointers (list[JsonPointer | str]): A list of JSON Pointers or strings representing the fields to nullify.
         
     Returns:
-        list[dict]: The modified list of dictionaries with specified fields set to None.
+        list[dict]: The modified list of dictionaries with specified fields set to an empty string.
     """
-    root_pointer = JsonPointer('/event/object_data')
-    rel_pointers = [p if isinstance(p, JsonPointer) else JsonPointer(p) for p in pointers]
-    pointers = [root_pointer.join(p) for p in rel_pointers]
-    
+    result = []
+    root_pointer = '$..object_data'
     for pointer in pointers:
+        jsonpath_expr = jsonparse(f'{root_pointer}..{pointer}')
         for entry in data:
-            try:
-                pointer.set(entry, None)
-            except JsonPointerException as e:
-                print(f"Error resolving JSON Pointer: {e}")
-    return data
+            result.append(jsonpath_expr.update(entry, ""))
+    return result
 
 
 if __name__ == '__main__':
@@ -120,7 +117,9 @@ if __name__ == '__main__':
         data = [json.loads(line) for line in f]
 
     pointers = [
-        'properties/data/attributes/userLabel'
+        'userLabel',
+        'description',
+        'networkConstruct..id'
     ]
 
     markers = read_start_markers('data.jsonl')
@@ -133,6 +132,9 @@ if __name__ == '__main__':
         for entry in mangled_data:
             f.write(json.dumps(entry).replace(' ', '') + '\n')
     
-    
+    for pointer in pointers:
+        json_str = f'$..object_data..{pointer}'
+        json_expr = jsonparse(json_str)
+        print(f'{json_str}: ', [match.value for match in json_expr.find(mangled_data)])
 
     

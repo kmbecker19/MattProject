@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "header": {
+    "envelopeId": "e8248681-bae5-48b2-94b9-eefb089d7f72",
+    "roleIds": [],
+    "timestamp": "2025-05-20T12:05:51.198466Z"
+  },
+  "event": {
+    "_type": "bp.v2.ResyncMarker",
+    "marker_type": "start",
+    "marker_id": "2d7d297f-7eee-45ae-9e1b-eebbffeae09f",
+    "domain_id": "bf129225-1a26-11f0-abdf-1511c0e6270c",
+    "is_full": true,
+    "marker_scope": {
+      "resourceTypes": [
+        "tosca.resourceTypes.NetworkConstruct",
+        "tosca.resourceTypes.TPE",
+        "tosca.resourceTypes.FRE",
+        "tosca.resourceTypes.Equipment"
+      ],
+      "filterParam": {
+        "properties": {
+          "device": "MD=CISCO_EPNM!ND=UNCERTO030-Lab4206-C"
+        }
+      },
+      "providerResourceId": "urn:ciena:bp:ra:radciscoepnmerf"
+    },
+    "reason": "174 resource(s)"
+  }
+}

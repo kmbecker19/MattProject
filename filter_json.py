@@ -97,7 +97,7 @@ def nullify_fields(data: list[dict], pointers: list[JsonPathStr]) -> list[dict]:
     
     Args:
         data (list[dict]): A list of dictionaries representing the JSONL data.
-        pointers (JsonPathStr): A list of JSON Pointers or strings representing the fields to nullify.
+        pointers (list[JsonPathStr]): A list of JSON Pointers or strings representing the fields to nullify.
         
     Returns:
         list[dict]: The modified list of dictionaries with specified fields set to an empty string.
@@ -111,21 +111,16 @@ def nullify_fields(data: list[dict], pointers: list[JsonPathStr]) -> list[dict]:
     return result
 
 
-if __name__ == '__main__':
-    parser = ArgumentParser(description="Filter and mangle JSONL data.")
-    parser.add_argument('--input', '-i', type=str, required=True, help='Input JSONL file path.')
-    parser.add_argument('--output', '-o', type=str, required=False, default='mangled_data.jsonl', help='Output JSONL file path.')
-    parser.add_argument('--pointers', '-p', type=str, nargs='+', required=False, default=[], help='List of JSON Pointers to nullify.')
-    parser.add_argument('--pointer_file', '-f', type=str, required=False, help='File containing JSON Pointers to nullify, one per line.')
+def mangle_json_file(input_file: str, output_file: str, pointers: list[JsonPathStr]) -> None:
+    """Mangle device names and nullify specified fields in a JSONL file.
     
-    args = parser.parse_args()
-    input_file = args.input
-    output_file = args.output
-    # Get pointers from command line list and specified file
-    pointers = args.pointers
-    with open(args.pointer_file, 'r') as pf:
-        pointers.extend([line.strip() for line in pf if line.strip()])
+    Writes the modified data to a new JSONL file.
 
+    Args:
+        input_file (str): The path to the input JSONL file.
+        output_file (str): The path to the output JSONL file.
+        pointers (list[JsonPathStr]): A list of JSON Pointers or strings representing the fields to nullify.
+    """
     # Get the devide name mapping from Resync start markers
     markers = read_start_markers(input_file)
     device_mappings = get_device_mappings(markers)
@@ -142,5 +137,24 @@ if __name__ == '__main__':
     with open(output_file, 'w') as f:
         for entry in mangled_data:
             f.write(json.dumps(entry).replace(' ', '') + '\n')
+            
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description="Filter and mangle JSONL data.")
+    parser.add_argument('--input', '-i', type=str, required=True, help='Input JSONL file path.')
+    parser.add_argument('--output', '-o', type=str, required=False, default='mangled_data.jsonl', help='Output JSONL file path.')
+    parser.add_argument('--pointers', '-p', type=str, nargs='+', required=False, default=[], help='List of JSON Pointers to nullify.')
+    parser.add_argument('--pointer_file', '-f', type=str, required=False, help='File containing JSON Pointers to nullify, one per line.')
+    
+    args = parser.parse_args()
+    input_file = args.input
+    output_file = args.output
+    # Get pointers from command line list and specified file
+    pointers = args.pointers
+    with open(args.pointer_file, 'r') as pf:
+        pointers.extend([line.strip() for line in pf if line.strip()])
+
+    mangle_json_file(input_file, output_file, pointers)
+
     print(f"Mangled data written to {output_file}")
     

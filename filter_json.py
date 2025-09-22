@@ -27,7 +27,41 @@ def hash_string(s: str, /) -> str:
     """
     return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
-
+def read_device_mappings(file: str) -> dict[str, str]:
+    """Read device mappings from a JSON file.
+    
+    Args:
+        file (str): The path to the JSON file containing device mappings.
+        
+    Returns:
+        dict[str, str]: A dictionary mapping device names to their mangled names.
+    """
+    # Get Resync Start markers using jsonparse
+    markers = []
+    mappings = {}
+    with open(file) as f:
+        for line in f:
+            if 'ResyncMarker' in line:
+                entry = json.loads(line)
+                json_marker_type = jsonparse(
+                    '$.event.marker_type'
+                )
+                if (match := json_marker_type.find(entry) and match[0].value == 'start'):
+                    markers.append(entry)
+    
+    # Extract device mappings from markers
+    json_expr = jsonparse('$..properties.device')
+    counter = 1
+    for marker in markers:
+        matches = json_expr.find(marker)
+        for match in matches:
+            device = match.value
+            if device not in mappings and (m := re.search(REGEX_STR, device)):
+                device_name = m.group(1)
+                mappings[device_name] = f'DEVICE-{counter:03}'
+                counter += 1
+    return mappings
+                
 def read_start_markers(file: str) -> list[dict]:
     """Get the Start markers from a JSONL file.
     
@@ -137,7 +171,7 @@ def mangle_json_file(input_file: str, output_file: str, pointers: list[JsonPathS
     with open(output_file, 'w') as f:
         for entry in mangled_data:
             f.write(json.dumps(entry).replace(' ', '') + '\n')
-            
+
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Filter and mangle JSONL data.")

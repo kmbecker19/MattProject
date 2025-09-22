@@ -14,6 +14,8 @@ JsonPathStr = Annotated[str, "A string formatted as a JSONPath expression from j
 # Regex pattern to match device names in the format !ND=DeviceName
 # Only works with CISCO
 REGEX_STR = r'!ND=([\w\-]*)'
+DEVICE_PATTERN_ND = re.compile(r'!ND=([\w\-]+)')
+DEVICE_PATTERN_PLAIN = re.compile(r'^[\w\-]+$')
 
 
 def hash_string(s: str, /) -> str:
@@ -26,6 +28,7 @@ def hash_string(s: str, /) -> str:
         str: The SHA-256 hash of the input string in hexadecimal format.
     """
     return hashlib.sha256(s.encode('utf-8')).hexdigest()
+
 
 def read_device_mappings(file: str) -> dict[str, str]:
     """Read device mappings from a JSON file.
@@ -55,13 +58,17 @@ def read_device_mappings(file: str) -> dict[str, str]:
     for marker in markers:
         matches = json_expr.find(marker)
         for match in matches:
-            device = match.value
-            if device not in mappings and (m := re.search(REGEX_STR, device)):
-                device_name = m.group(1)
+            if (device := match.value) not in mappings:
+                # Match ND format
+                if (m := DEVICE_PATTERN_ND.match(device)):
+                    device_name = m.group(1)
+                else:
+                    device_name = device
                 mappings[device_name] = f'DEVICE-{counter:03}'
                 counter += 1
     return mappings
-                
+
+
 def read_start_markers(file: str) -> list[dict]:
     """Get the Start markers from a JSONL file.
     
@@ -108,22 +115,19 @@ def mangle_device_names(data: list[dict], device_mappings: dict[str, str]) -> li
     
     Args:
         data (list[dict]): A list of dictionaries representing the JSONL data.
-        device_hashes (dict[str, str]): A dictionary mapping device names to their SHA-256 hashes.
+        device_mappings (dict[str, str]): A dictionary mapping device names to their SHA-256 hashes.
         
     Returns:
         list[dict]: The modified list of dictionaries with mangled device names.
     """
-    device_pattern = re.compile(REGEX_STR)
-    
-    for entry in data:
+    new_data = data.copy()
+    for entry in new_data:
         entry_str = json.dumps(entry)
-        matches = device_pattern.findall(entry_str)
-        for match in matches:
-            if match in device_mappings:
-                mangled_name = device_mappings[match]
-                entry_str = entry_str.replace(f'!ND={match}', f'!ND={mangled_name}')
+        for device, mangled_name in device_mappings.items():
+            entry_str = entry_str.replace(f'{device}', f'{mangled_name}')
         entry.update(json.loads(entry_str))
-    return data
+
+    return new_data
 
 
 def nullify_fields(data: list[dict], pointers: list[JsonPathStr]) -> list[dict]:
@@ -185,8 +189,9 @@ if __name__ == '__main__':
     output_file = args.output
     # Get pointers from command line list and specified file
     pointers = args.pointers
-    with open(args.pointer_file, 'r') as pf:
-        pointers.extend([line.strip() for line in pf if line.strip()])
+    if args.pointer_file:
+        with open(args.pointer_file, 'r') as pf:
+            pointers.extend([line.strip() for line in pf if line.strip()])
 
     mangle_json_file(input_file, output_file, pointers)
 

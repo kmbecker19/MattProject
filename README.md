@@ -19,10 +19,14 @@
    - User should be able to choose which properties to nullify
    - User gives pointers (pointers => paths)
 4. Output should be `.jsonl` file with device names replaced AND sensative fields nullified
-
+5. Create Runner in GitLab
+   - Run linting check for formatting
+   - Dev branch should pass runners before getting merged to main
+     
 ## Notes
 
 - Find device names in Resync object, replace names in BOTH Resync object AND Future lines.
 - Each Resync start should have **1 device**
 - `object_data` contains the contents of the JSON data
 - No `object_data` field in `start` or `end` markers
+

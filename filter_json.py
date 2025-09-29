@@ -1,12 +1,9 @@
-import os
 import json
 import re
 from argparse import ArgumentParser
 import hashlib
-from typing import Any, Dict, List, Union, Annotated
-from pprint import pprint
+from typing import Annotated
 
-from jsonpath_ng import jsonpath
 from jsonpath_ng import parse as jsonparse
 from jsonpointer import JsonPointer, JsonPointerException
 
@@ -49,7 +46,7 @@ def read_device_mappings(file: str) -> dict[str, str]:
                 json_marker_type = jsonparse(
                     '$.event.marker_type'
                 )
-                if (match := json_marker_type.find(entry) and match[0].value == 'start'):
+                if ((match := json_marker_type.find(entry)) and match[0].value == 'start'):
                     markers.append(entry)
     
     # Extract device mappings from markers

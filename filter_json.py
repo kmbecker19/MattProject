@@ -90,11 +90,11 @@ def get_device_mappings(markers: list[dict]) -> dict[str, str]:
     """Get a mapping of device names to their new mangled names.
 
     Args:
-        markers (list[dict]): A list of dictionaries representing 
+        markers (list[dict]): A list of dictionaries representing
                               the start markers.
 
     Returns:
-        dict[str, str]: A dictionary mapping device names 
+        dict[str, str]: A dictionary mapping device names
                         to their mangled names.
     """
     device_pointer = JsonPointer(
@@ -146,7 +146,7 @@ def nullify_fields(
 
     Args:
         data (list[dict]): A list of dictionaries representing the JSONL data.
-        pointers (list[JsonPathStr]): A list of JSON Pointers or strings 
+        pointers (list[JsonPathStr]): A list of JSON Pointers or strings
                                       representing the fields to nullify.
 
     Returns:

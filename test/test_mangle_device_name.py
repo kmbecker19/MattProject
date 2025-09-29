@@ -102,12 +102,14 @@ def example_mangled_data():
 
 
 def test_get_device_mappings(example_jsonl_data, example_device_mappings):
+    """Test the get_device_mappings function."""
     assert get_device_mappings(example_jsonl_data) == example_device_mappings
 
 
 def test_mangle_device_names(
     example_jsonl_data, example_device_mappings, example_mangled_data
 ):
+    """Test the mangle_device_names function."""
     assert (
         mangle_device_names(example_jsonl_data, example_device_mappings)
         == example_mangled_data

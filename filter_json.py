@@ -5,7 +5,6 @@ import hashlib
 from typing import Annotated
 
 from jsonpath_ng import parse as jsonparse
-from jsonpointer import JsonPointer, JsonPointerException
 
 JsonPathStr = Annotated[
     str, "A string formatted as a JSONPath expression from jsonpath_ng."
@@ -41,7 +40,6 @@ def read_device_mappings(file: str) -> dict[str, str]:
     """
     # Get Resync Start markers using jsonparse
     markers = []
-    mappings = {}
     with open(file) as f:
         for line in f:
             if "ResyncMarker" in line:
@@ -53,20 +51,7 @@ def read_device_mappings(file: str) -> dict[str, str]:
                     markers.append(entry)
 
     # Extract device mappings from markers
-    json_expr = jsonparse("$..properties.device")
-    counter = 1
-    for marker in markers:
-        matches = json_expr.find(marker)
-        for match in matches:
-            if (device := match.value) not in mappings:
-                # Match ND format
-                if m := DEVICE_PATTERN_ND.match(device):
-                    device_name = m.group(1)
-                else:
-                    device_name = device
-                mappings[device_name] = f"DEVICE-{counter:03}"
-                counter += 1
-    return mappings
+    return get_device_mappings(markers)
 
 
 def read_start_markers(file: str) -> list[dict]:
@@ -97,23 +82,21 @@ def get_device_mappings(markers: list[dict]) -> dict[str, str]:
         dict[str, str]: A dictionary mapping device names
                         to their mangled names.
     """
-    device_pointer = JsonPointer(
-        "/event/marker_scope/filterParam/properties/device"
-    )
-    device_hashes = {}
+    jsonpath_expr = jsonparse("$..properties.device")
+    mappings = {}
     counter = 1
     for marker in markers:
-        try:
-            device = device_pointer.resolve(marker)
-            if device not in device_hashes and (
-                match := re.search(REGEX_STR, device)
-            ):
-                device_name = match.group(1)
-                device_hashes[device_name] = f"DEVICE-{counter:03}"
+        matches = jsonpath_expr.find(marker)
+        for match in matches:
+            if (device := match.value) not in mappings:
+                # Match ND format
+                if m := DEVICE_PATTERN_ND.match(device):
+                    device_name = m.group(1)
+                else:
+                    device_name = device
+                mappings[device_name] = f"DEVICE-{counter:03}"
                 counter += 1
-        except JsonPointerException as e:
-            print(f"Error resolving JSON Pointer: {e}")
-    return device_hashes
+    return mappings
 
 
 def mangle_device_names(

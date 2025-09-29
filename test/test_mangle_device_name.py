@@ -1,5 +1,5 @@
 import pytest
-from filter_json import mangle_device_names, get_device_mappings
+from ..filter_json import mangle_device_names, get_device_mappings
 
 
 @pytest.fixture

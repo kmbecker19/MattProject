@@ -36,7 +36,7 @@ def read_device_mappings(file: str) -> dict[str, str]:
         file (str): The path to the JSON file containing device mappings.
 
     Returns:
-        dict[str, str]: A dictionary mapping device names 
+        dict[str, str]: A dictionary mapping device names
                         to their mangled names.
     """
     # Get Resync Start markers using jsonparse

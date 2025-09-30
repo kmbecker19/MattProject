@@ -114,3 +114,10 @@ def test_mangle_device_names(
         mangle_device_names(example_jsonl_data, example_device_mappings)
         == example_mangled_data
     )
+
+
+def test_map_and_mangle(example_jsonl_data, example_mangled_data):
+    """Test the combined mapping and mangling process."""
+    device_mappings = get_device_mappings(example_jsonl_data)
+    mangled_data = mangle_device_names(example_jsonl_data, device_mappings)
+    assert mangled_data == example_mangled_data

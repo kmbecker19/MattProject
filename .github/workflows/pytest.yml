@@ -28,4 +28,4 @@ jobs:
           python -m pip install pytest
       - name: Unit Test with Pytest
         run: |
-          pytest -vv test/mangle_device_name.py
+          pytest -vv test/test_mangle_device_name.py

@@ -88,12 +88,14 @@ def get_device_mappings(markers: list[dict]) -> dict[str, str]:
     for marker in markers:
         matches = jsonpath_expr.find(marker)
         for match in matches:
-            if (device := match.value) not in mappings:
-                # Match ND format
-                if m := DEVICE_PATTERN_ND.match(device):
-                    device_name = m.group(1)
-                else:
-                    device_name = device
+            # Extract device names using regex
+            device = match.value
+            if nd_name := DEVICE_PATTERN_ND.search(device):
+                device_name = nd_name.group(1)
+            else:
+                device_name = device
+            # Add extracted names to mappings if not present
+            if device_name not in mappings:
                 mappings[device_name] = f"DEVICE-{counter:03}"
                 counter += 1
     return mappings

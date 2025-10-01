@@ -138,6 +138,8 @@ def nullify_fields(
         list[dict]: The modified list of dictionaries with specified fields
                     set to an empty string.
     """
+    if not pointers:
+        return data
     result = []
     root_pointer = "$..object_data"
     for pointer in pointers:

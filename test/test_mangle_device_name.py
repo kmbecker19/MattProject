@@ -1,5 +1,6 @@
 import pytest
 from ..filter_json import mangle_device_names, get_device_mappings
+from .utils import make_test_cases
 
 
 @pytest.fixture
@@ -101,6 +102,18 @@ def example_mangled_data():
     ]
 
 
+@pytest.fixture
+def example_device_pairs():
+    return [
+        (
+            "MD=CISCO_EPNM!ND=UNCERTO030-Lab4206-C",
+            "MD=CISCO_EPNM!ND=DEVICE-001",
+        ),
+        ("MD=CISCO_EPNM!ND=URZELAB077", "MD=CISCO_EPNM!ND=DEVICE-002"),
+        ("USMDF-007", "DEVICE-003"),
+    ]
+
+
 def test_get_device_mappings(example_jsonl_data, example_device_mappings):
     """Test the get_device_mappings function."""
     assert get_device_mappings(example_jsonl_data) == example_device_mappings
@@ -120,3 +133,10 @@ def test_map_and_mangle(example_jsonl_data, example_mangled_data):
     device_mappings = get_device_mappings(example_jsonl_data)
     mangled_data = mangle_device_names(example_jsonl_data, device_mappings)
     assert mangled_data == example_mangled_data
+
+
+def test_auto_generate_example(example_device_pairs):
+    inputs, expected = make_test_cases(example_device_pairs)
+    device_mappings = get_device_mappings(inputs)
+    mangled_data = mangle_device_names(inputs, device_mappings)
+    assert mangled_data == expected

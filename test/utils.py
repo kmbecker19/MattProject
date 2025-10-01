@@ -19,7 +19,7 @@ def make_test_cases(devices):
         timestamp = (
             datetime.datetime(2025, 5, 20, 12, 5, 51 + i).isoformat() + "Z"
         )
-        reason = f"{100 + i*10} resource(s)"
+        reason = f"{100 + (i * 10)} resource(s)"
 
         base_obj = {
             "version": 1,

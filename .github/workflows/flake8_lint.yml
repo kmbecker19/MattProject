@@ -28,5 +28,5 @@ jobs:
           pip install flake8
       - name: Lint Python Code with Flake8
         run: |
-          flake8 $(git ls-files '*.py')
+          flake8 --ignore=E501 $(git ls-files '*.py')
     

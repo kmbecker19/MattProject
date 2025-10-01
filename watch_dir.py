@@ -1,6 +1,25 @@
 import logging
 from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
+from watchdog.events import (
+    LoggingEventHandler,
+    FileSystemEventHandler,
+    FileCreatedEvent,
+    FileModifiedEvent,
+)
+
+
+class CustomEventHandler(FileSystemEventHandler):
+    def on_created(self, event):
+        if isinstance(event, FileCreatedEvent):
+            file_path = event.src_path
+            logging.info(f"File created: {file_path}")
+            # TODO: Implement running python script
+
+    def on_modified(self, event):
+        if isinstance(event, FileModifiedEvent):
+            file_path = event.src_path
+            logging.info(f"File modified: {file_path}")
+            # TODO: Implement running python script
 
 
 def log_filesystem_change(path="."):

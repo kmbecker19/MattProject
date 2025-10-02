@@ -12,8 +12,7 @@ def test_mangle_device_names(
 ):
     """Test the mangle_device_names function."""
     assert (
-        mangle_device_names(example_jsonl_data, example_device_mappings)
-        == example_mangled_data
+        mangle_device_names(example_jsonl_data, example_device_mappings) == example_mangled_data
     )
 
 

@@ -208,6 +208,126 @@ def example_device_pairs():
     ]
 
 
+@pytest.fixture
+def example_nested_data():
+    return [
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceA",
+                    "info": "Some info",
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceB",
+                    "info": "Other info",
+                    "secret-info": "This info should be a null string.",
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceA",
+                    "info": "Repeated device",
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceC",
+                    "info": "More info",
+                    "secret": {
+                        "info": "This info should also be a null string."
+                    },
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "DeviceD",
+                    "info": "Different format",
+                    "secret": {
+                        "info": "Make sure to nullify this data!",
+                        "public": {
+                            "info": "This info should remain unchanged."
+                        },
+                    },
+                }
+            }
+        },
+    ]
+
+
+@pytest.fixture
+def example_null_data():
+    return [
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceA",
+                    "info": "Some info",
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceB",
+                    "info": "Other info",
+                    "secret-info": "",
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceA",
+                    "info": "Repeated device",
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "MD=CISCO_EPNM!ND=DeviceC",
+                    "info": "More info",
+                    "secret": {
+                        "info": ""
+                    },
+                }
+            }
+        },
+        {
+            "event": {
+                "object_data": {
+                    "device": "DeviceD",
+                    "info": "Different format",
+                    "secret": {
+                        "info": "",
+                        "public": {
+                            "info": "This info should remain unchanged."
+                        },
+                    },
+                }
+            }
+        },
+    ]
+
+
+@pytest.fixture
+def example_pointers():
+    return [
+        "secret-info",
+        "secret.info"
+    ]
+
+
 def make_response(base, modifier=None):
     """Factory function for genrerating modified copies of a base response.
 

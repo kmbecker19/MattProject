@@ -142,10 +142,11 @@ def nullify_fields(
         return data
     result = []
     root_pointer = "$..object_data"
-    for pointer in pointers:
-        jsonpath_expr = jsonparse(f"{root_pointer}..{pointer}")
-        for entry in data:
-            result.append(jsonpath_expr.update(entry, ""))
+    for entry in data:
+        for pointer in pointers:
+            jsonpath_expr = jsonparse(f"{root_pointer}..{pointer}")
+            entry = jsonpath_expr.update(entry, "")
+        result.append(entry)
     return result
 
 
